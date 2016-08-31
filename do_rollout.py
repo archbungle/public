@@ -1,6 +1,12 @@
 #Python code to build a basic droplet using D.O API
 #And do basic lifecycle management of the droplet
 #traiano, 31 August 2016
+#Install python digital ocean module as follows:
+#You can install python-digitalocean using **pip**
+#pip install -U python-digitalocean
+#Replace "your_personal_do_token" with your personal
+#digital ocean token (first get an account)
+
 import digitalocean
 my_token="your_personal_do_token"
 
