@@ -1,0 +1,77 @@
+bash-3.2$ python dorollout.py
+1] Enter 1 for a list of droplets.
+2] Enter 2 to poweroff all nodes.
+3] Enter 3 startup all nodes.
+4] Enter 4 delete all droplets.
+5] Enter 5 to create a droplet
+6] Enter 6 to quit.
+
+option> 1
+
+1] Enter 1 for a list of droplets.
+2] Enter 2 to poweroff all nodes.
+3] Enter 3 startup all nodes.
+4] Enter 4 delete all droplets.
+5] Enter 5 to create a droplet
+6] Enter 6 to quit.
+
+option> 5
+Enter droplet name: aniDroplet
+
+1] Enter 1 for a list of droplets.
+2] Enter 2 to poweroff all nodes.
+3] Enter 3 startup all nodes.
+4] Enter 4 delete all droplets.
+5] Enter 5 to create a droplet
+6] Enter 6 to quit.
+
+option> 1
+droplet:  24301185 aniDroplet
+
+1] Enter 1 for a list of droplets.
+2] Enter 2 to poweroff all nodes.
+3] Enter 3 startup all nodes.
+4] Enter 4 delete all droplets.
+5] Enter 5 to create a droplet
+6] Enter 6 to quit.
+option> 
+
+option> 3
+droplet:  24301185 aniDroplet action:  139071566 power_on [completed]  Action Status:  completed
+droplet:  24301185 aniDroplet action:  139071311 create [completed]  Action Status:  completed
+1] Enter 1 for a list of droplets.
+2] Enter 2 to poweroff all nodes.
+3] Enter 3 startup all nodes.
+4] Enter 4 delete all droplets.
+5] Enter 5 to create a droplet
+6] Enter 6 to quit.
+
+option> 2
+droplet:  24301185 aniDroplet action:  139071715 shutdown [completed]  Action Status:  completed
+droplet:  24301185 aniDroplet action:  139071566 power_on [completed]  Action Status:  completed
+droplet:  24301185 aniDroplet action:  139071311 create [completed]  Action Status:  completed
+
+1] Enter 1 for a list of droplets.
+2] Enter 2 to poweroff all nodes.
+3] Enter 3 startup all nodes.
+4] Enter 4 delete all droplets.
+5] Enter 5 to create a droplet
+6] Enter 6 to quit.
+
+option> 4
+droplet:  24301185 aniDroplet action:  139071829 destroy [completed]  Action Status:  completed
+droplet:  24301185 aniDroplet action:  139071715 shutdown [completed]  Action Status:  completed
+droplet:  24301185 aniDroplet action:  139071566 power_on [completed]  Action Status:  completed
+droplet:  24301185 aniDroplet action:  139071311 create [completed]  Action Status:  completed
+
+1] Enter 1 for a list of droplets.
+2] Enter 2 to poweroff all nodes.
+3] Enter 3 startup all nodes.
+4] Enter 4 delete all droplets.
+5] Enter 5 to create a droplet
+6] Enter 6 to quit.
+
+option> 6
+
+
+
