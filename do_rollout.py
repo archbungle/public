@@ -3,7 +3,7 @@
 #traiano, 31 August 2016
 import digitalocean
 my_token="0073ae2d8412fda6232931dfc6e37dcbd3854d632fa8b925fcb93a1a8657e458"
-my_sshkey_id="do-primary-key"
+my_sshkey_id=3189478
 
 def operations_menu():
  status=0
@@ -47,7 +47,7 @@ def build_new_droplet(d_name):
  region='nyc2',
  image='ubuntu-14-04-x64',
  size_slug='512mb',
- ssh_key_ids=[my_sshkey_id],
+ ssh_keys=[my_sshkey_id],
  backups=True)
  results=droplet.create()
  print "droplet data> ",results
