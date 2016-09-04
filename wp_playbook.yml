@@ -2,9 +2,16 @@
 - hosts: all
   remote_user: root
   tasks:
-   - name: make sure nginx is running
-     service: name=nginx state=running
-   - name: restart nginx service
-     service: name=nginx state=restarted
-   - name: make sure mysql running 
-     service: name=mysql-server state=running
+    - name: Installs nginx web server
+      apt: pkg=nginx state=installed update_cache=true
+      notify:
+        - start nginx
+    - name: Installs mysql server
+      apt: pkg=mysql-server state=installed update_cache=true
+      notify:
+        - start mysql
+  handlers:
+    - name: start nginx
+      service: name=nginx state=started
+    - name: start mysql server
+      service: name=mysql state=started
