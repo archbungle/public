@@ -1,0 +1,10 @@
+---
+- hosts: all
+  remote_user: root
+  tasks:
+   - name: make sure nginx is running
+     service: name=nginx state=running
+   - name: restart nginx service
+     service: name=nginx state=restarted
+   - name: make sure mysql running 
+     service: name=mysql-server state=running
