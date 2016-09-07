@@ -1,7 +1,12 @@
 ---
 - hosts: all
   remote_user: root
+  vars:
+    username: www-data
   tasks:
+    - name: Installs git
+      apt: pkg=git state=installed update_cache=true
+
     - name: Installs nginx web server
       apt: pkg=nginx state=installed update_cache=true
       notify:
@@ -10,6 +15,46 @@
       apt: pkg=mysql-server state=installed update_cache=true
       notify:
         - start mysql
+    - name: Installs Wordpress
+      apt: pkg=wordpress state=installed update_cache=true
+      notify:
+        - restarted nginx
+
+    - name: Check Nginx configs exist
+      stat: path=/etc/nginx/.git
+      register: git_exists
+
+    - name: Remove default Nginx configs
+      file:
+       path: /etc/nginx
+       state: absent
+      when: not git_exists.stat.exists
+
+    - name: Clone Nginx configs
+      git:
+       repo: https://github.com/A5hleyRich/wordpress-nginx.git
+       dest: /etc/nginx
+       version: master
+       force: yes
+      when: not git_exists.stat.exists
+
+    - name: Symlink default site
+      file: 
+       src: /etc/nginx/sites-available/singlesite.com
+       dest: /etc/nginx/sites-enabled/default
+       state: link
+      notify:
+        - restarted nginx 
+    
+    - name: Set Nginx user
+      lineinfile: 
+       dest: /etc/nginx/nginx.conf
+       regexp: "^user"
+       line: "user {{ username }};"
+       state: present
+      notify:
+        - restarted nginx 
+
   handlers:
     - name: start nginx
       service: name=nginx state=started
