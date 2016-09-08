@@ -15,6 +15,9 @@
       apt: pkg=mysql-server state=installed update_cache=true
       notify:
         - start mysql
+
+    - mysql_db: name=wordpress state=present
+
     - name: Installs Wordpress
       apt: pkg=wordpress state=installed update_cache=true
       notify:
@@ -32,26 +35,19 @@
 
     - name: Clone Nginx configs
       git:
-       repo: https://github.com/A5hleyRich/wordpress-nginx.git
+       repo: https://github.com/archbungle/nginx.git
        dest: /etc/nginx
        version: master
        force: yes
       when: not git_exists.stat.exists
 
+    - mysql_user: name=wordpress password=pressword priv=*.*:ALL state=present
+
     - name: Symlink default site
       file: 
-       src: /etc/nginx/sites-available/singlesite.com
+       src: /etc/nginx/sites-available/mysite
        dest: /etc/nginx/sites-enabled/default
        state: link
-      notify:
-        - restarted nginx 
-    
-    - name: Set Nginx user
-      lineinfile: 
-       dest: /etc/nginx/nginx.conf
-       regexp: "^user"
-       line: "user {{ username }};"
-       state: present
       notify:
         - restarted nginx 
 
