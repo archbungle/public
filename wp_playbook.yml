@@ -75,7 +75,7 @@
         - restarted nginx 
 
     - name: Move wp confgurtion into place to /var/www/html/ 
-      command: "cp /etc/nginx/wp-config.php /var/www/nginx/"
+      command: "cp /etc/nginx/wp-config.php /var/www/html/wordpress/"
 
   handlers:
     - name: start nginx
