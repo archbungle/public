@@ -3,6 +3,12 @@
   remote_user: root
   vars:
     username: www-data
+    download_url:  "http://wordpress.org/latest.tar.gz"
+    download_folder: "/opt"
+    wordpress_archive: "{{download_folder}}/latest.tar.gz"
+    wordpress_name: "{{download_folder}}/wordpress"
+    wordpress_target: "/var/www/html/"
+
   tasks:
     - name: Installs git
       apt: pkg=git state=installed update_cache=true
@@ -31,10 +37,14 @@
 
     - mysql_db: name=wordpress state=present
 
-    - name: Installs Wordpress
-      apt: pkg=wordpress state=installed update_cache=true
-      notify:
-        - restarted nginx
+    - name: Download wordpress
+      command: "wget -q -O {{wordpress_archive}} --no-check-certificate --no-cookies {{download_url}} creates={{wordpress_archive}}" 
+
+    - name: Unpack archive
+      command: "tar -zxf {{wordpress_archive}} -C {{download_folder}} creates={{wordpress_name}}"
+
+    - name: Move to /var/www/html/ 
+      command: "rsync -avP {{wordpress_name}} {{wordpress_target}}"
 
     - name: Check Nginx configs exist
       stat: path=/etc/nginx/.git
@@ -63,6 +73,9 @@
        state: link
       notify:
         - restarted nginx 
+
+    - name: Move wp confgurtion into place to /var/www/html/ 
+      command: "cp /etc/nginx/wp-config.php /var/www/nginx/"
 
   handlers:
     - name: start nginx
