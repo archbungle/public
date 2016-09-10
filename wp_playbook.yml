@@ -83,13 +83,16 @@
       notify:
         - restarted nginx 
 
-    - name: Fix the Wordpress IP address which could be stale from old installation 
-      command: "/bin/bash /etc/nginx/fix_wp_ip.sh" 
-
     - name: Move wp confgurtion into place to /var/www/html/ 
       command: "cp /etc/nginx/wp-config.php /var/www/html/wordpress/"
 
     - mysql_db: name=wordpress state=import target=/etc/nginx/wordpress.sql
+
+    - name: Fix the Wordpress IP address which could be stale from old installation 
+      command: "/etc/nginx/fix_wp_ip.sh" 
+
+    - name: restart nginx services to test robustness 
+      command: "service nginx restart"
 
   handlers:
     - name: start nginx
