@@ -5,12 +5,12 @@ import digitalocean
 import os
 
 #User customised variables below (ADD YOUR D.O Account and ssh key here)
-my_token="replace with your own DO API token"
+my_token="replace-with-your-digital-ocean-api-token"
 hosts=[]
 hosts_file="/Users/traianow/Projects/DO/hosts.orig"		#the ansible hosts file
 private_key="/Users/traianow/Projects/DO/do_rsa"
 wordpress_playbook="/Users/traianow/Projects/DO/wp_playbook.yml"
-my_sshkey_id=3189478			#replace with your own D.O ssh key ID!
+my_sshkey_id=replace-with-your-digital-ocean-ssh-key-id
 
 def operations_menu():
  status=0
@@ -91,6 +91,20 @@ def write_ansible_hosts_file():
 def restart_web_services(d_name):
  #restart web services on the specified web server
  print ""
+ print "Restarting NGINX ..."
+ print ""
+ manager = digitalocean.Manager(token=my_token)
+ droplets = manager.get_all_droplets()
+ print ""
+ for droplet in droplets:
+  if(droplet.name == d_name):
+   droplet_data=droplet.load()
+   restart_command="ssh -l root -i "+private_key+" "+droplet.ip_address+" 'service nginx restart'"
+   print "Restarting NGINX with: "+restart_command
+   os.system(restart_command)
+  else:
+   print "Cannot find a host matching that name"
+ print ""
 
 def update_wp_code(d_name):
  #checkout latest WP site from GIT/Hub and ansible update the web servers
@@ -111,6 +125,9 @@ def  deploy_wp_playbook(d_name):
  print ""
  ansible_playbook_command="ansible-playbook --private-key "+private_key+" -u root -s "+wordpress_playbook+" -i "+"/Users/traianow/Projects/DO/hosts.orig"
  os.system(ansible_playbook_command)
+ print ""
+ print "DONE! Your Wordpress Blog is Ready, go to: http://<ip-address-of-server>"
+ print ""
 
 def ansible_ping_all(): 
  #ansible ping all servers
