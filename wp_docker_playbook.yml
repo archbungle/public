@@ -43,7 +43,7 @@
        force: yes
 
     - name: create wordpress database in the new docker mysql database container
-      command: "docker exec -i wordpressdb mysql -uroot --force < /opt/wordpress/makedb.sql"
+      command: "docker exec -i wordpressdb mysql -uroot -ppassword --force wordpress< /opt/wordpress/makedb.sql"
 
     - name: import most recent wordpress database into the new docker mysql database container
-      command: "docker exec -i wordpressdb mysql -uroot --force < /opt/wordpress/wordpress.sql"
+      command: "docker exec -i wordpressdb mysql -uroot -ppassword --force wordpress< /opt/wordpress/wordpress.sql"
