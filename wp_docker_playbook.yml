@@ -1,0 +1,49 @@
+---
+- hosts: all
+  remote_user: root
+  vars:
+    username: www-data
+    download_url:  "http://wordpress.org/latest.tar.gz"
+    download_folder: "/opt"
+    wordpress_archive: "{{download_folder}}/latest.tar.gz"
+    wordpress_name: "{{download_folder}}/wordpress"
+    wordpress_target: "/var/www/html/"
+
+  tasks:
+
+    - name: Installs python pip
+      apt: pkg=python-pip state=installed update_cache=true
+
+    - name: Installs python development headers and libraries 
+      apt: pkg=libpython-dev state=installed update_cache=true
+
+    - name: Installs required mysql libraries for python 
+      apt: pkg=libmysqlclient-dev state=installed update_cache=true
+
+    - name: Install the Python MySQLB module
+      pip: name=mysql-python
+
+    - name: pull the official mysql image from the docker main site
+      command: "docker pull mysql:5.7"
+
+    - name: pull the official wordpress image from the docker main site
+      command: "docker pull wordpress"
+
+    - name: deploy mysql docker container for wordpress database 
+      command: "docker run --name wordpressdb -e MYSQL_ROOT_PASSWORD=password -e MYSQL_DATABASE=wordpress -d mysql:5.7"
+   
+    - name: build wordpress container then map folders and ports
+      command: "docker run -e WORDPRESS_DB_PASSWORD=password -d --name wordpress --link wordpressdb:mysql -p 80:80 -v \"$PWD\"/:/var/www/html wordpress"
+
+    - name: clone wordpress db and misc configs
+      git:
+       repo: https://github.com/archbungle/wpblog.git
+       dest: /opt/wordpress
+       version: master
+       force: yes
+
+    - name: create wordpress database in the new docker mysql database container
+      command: "docker exec -i wordpressdb mysql -uroot --force < /opt/wordpress/makedb.sql"
+
+    - name: import most recent wordpress database into the new docker mysql database container
+      command: "docker exec -i wordpressdb mysql -uroot --force < /opt/wordpress/wordpress.sql"
