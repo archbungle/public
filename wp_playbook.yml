@@ -19,8 +19,14 @@
     - name: Installs python development headers and libraries 
       apt: pkg=libpython-dev state=installed update_cache=true
 
+    - name: Installs  php5-fpm 
+      apt: pkg=php5-fpm state=installed update_cache=true
+
     - name: Installs required mysql libraries for python 
       apt: pkg=libmysqlclient-dev state=installed update_cache=true
+
+    - name: Installs required mysql libraries for PHP/Wordpress 
+      apt: pkg=php5-mysql state=installed update_cache=true
 
     - name: Install the Python MySQLB module
       pip: name=mysql-python
@@ -29,6 +35,9 @@
       apt: pkg=nginx state=installed update_cache=true
       notify:
         - start nginx
+
+    - name: make a standard web directory 
+      command: "mkdir -p /var/www/html" 
 
     - name: Installs mysql server
       apt: pkg=mysql-server state=installed update_cache=true
@@ -69,13 +78,18 @@
     - name: Symlink default site
       file: 
        src: /etc/nginx/sites-available/mysite
-       dest: /etc/nginx/sites-enabled/default
+       dest: /etc/nginx/sites-enabled/mysite
        state: link
       notify:
         - restarted nginx 
 
+    - name: Fix the Wordpress IP address which could be stale from old installation 
+      command: "/bin/bash /etc/nginx/fix_wp_ip.sh" 
+
     - name: Move wp confgurtion into place to /var/www/html/ 
       command: "cp /etc/nginx/wp-config.php /var/www/html/wordpress/"
+
+    - mysql_db: name=wordpress state=import target=/etc/nginx/wordpress.sql
 
   handlers:
     - name: start nginx
