@@ -23,6 +23,17 @@
     - name: Install the Python MySQLB module
       pip: name=mysql-python
 
+    - name: clone wordpress db and misc configs
+      git:
+       repo: https://github.com/archbungle/wpblog.git
+       dest: /opt/wordpress
+       version: master
+       force: yes
+
+    - name: clean up all past db and wordpress containers
+      command: "/bin/bash /opt/wordpress/clean.sh" 
+      ignore_errors: yes
+
     - name: pull the official mysql image from the docker main site
       command: "docker pull mysql:5.7"
 
@@ -31,19 +42,15 @@
 
     - name: deploy mysql docker container for wordpress database 
       command: "docker run --name wordpressdb -e MYSQL_ROOT_PASSWORD=password -e MYSQL_DATABASE=wordpress -d mysql:5.7"
-   
-    - name: build wordpress container then map folders and ports
-      command: "docker run -e WORDPRESS_DB_PASSWORD=password -d --name wordpress --link wordpressdb:mysql -p 80:80 -v \"$PWD\"/:/var/www/html wordpress"
-
-    - name: clone wordpress db and misc configs
-      git:
-       repo: https://github.com/archbungle/wpblog.git
-       dest: /opt/wordpress
-       version: master
-       force: yes
 
     - name: create wordpress database in the new docker mysql database container
-      command: "docker exec -i wordpressdb mysql -uroot -ppassword --force wordpress< /opt/wordpress/makedb.sql"
+      command: "/bin/bash /opt/wordpress/restore.sh" 
+      ignore_errors: yes
+   
+    - name: build wordpress container then map folders and ports
+      command: "docker run -e WORDPRESS_DB_PASSWORD=password -d --name wordpress --link wordpressdb:mysql -p 80:80 -v '$PWD'/:/var/www/html wordpress"
 
-    - name: import most recent wordpress database into the new docker mysql database container
-      command: "docker exec -i wordpressdb mysql -uroot -ppassword --force wordpress< /opt/wordpress/wordpress.sql"
+    - name: update stale wordpress ip addresses 
+      command: "/bin/bash /opt/wordpress/fix_wp_ip.sh" 
+      ignore_errors: yes
+
