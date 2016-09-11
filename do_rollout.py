@@ -4,13 +4,15 @@
 import digitalocean
 import os
 
-#User customised variables below (ADD YOUR D.O Account and ssh key here)
+#User customised variables below (ADD YOUR Digital Ocean Account and ssh key here)
 my_token="replace-with-your-digital-ocean-api-token"
 hosts=[]
-hosts_file="/Users/traianow/Projects/DO/hosts.orig"		#the ansible hosts file
-private_key="/Users/traianow/Projects/DO/do_rsa"
-wordpress_playbook="/Users/traianow/Projects/DO/wp_playbook.yml"
-my_sshkey_id=replace-with-your-digital-ocean-ssh-key-id
+hosts_file="/Users/traianow/Projects/DO/hosts.orig"				#the ansible hosts file
+private_key="/Users/traianow/Projects/DO/do_rsa"				#where your SSH private key is
+wordpress_playbook="/Users/traianow/Projects/DO/wp_playbook.yml"		#path to your wordpress playbook
+docker_playbook="/Users/traianow/Projects/DO/docker_install_playbook.yml"	#path to the docker install playbook
+wordpress_docker_playbook="/Users/traianow/Projects/DO/wp_docker_playbook.yml"	#path to the wordpress docker playbook
+my_sshkey_id=REPLACE-WITH-YOUR-Digital-Ocean-SSH-Key				#Select the SSH key registered in Digital Ocean Account
 
 def operations_menu():
  status=0
@@ -27,6 +29,8 @@ def operations_menu():
   print "10] Enter 10 to update WordPress site"
   print "11] Enter 11 to restart Web Services"
   print "12] Enter 12 to generate Ansible hosts file."
+  print "13] Enter 13 to run the docker playbook."
+  print "14] Enter 14 to run 'dockerized' WordPress playbook."
   print "15] Enter 15 to quit."
   option=int(raw_input("option> "))
   if(option==1):
@@ -66,8 +70,32 @@ def operations_menu():
   elif(option==15):
    status=15
    continue
+  elif(option==13):
+   d_name=str(raw_input("Enter droplet name to install docker on: "))
+   d_name.strip("_")				# for anyone tempted to use underscores
+   install_docker(d_name)
+  elif(option==14):
+   d_name=str(raw_input("Enter droplet name: "))
+   d_name.strip("_")				# for anyone tempted to use underscores
+   dockerize_wordpress(d_name)
   else:
    print "invalid option"
+
+def dockerize_wordpress(d_name):
+ print ""
+ print "Installing docker on this VM: ",d_name
+ print ""
+ ansible_playbook_command="ansible-playbook --private-key "+private_key+" -u root -s "+wordpress_docker_playbook+" -i "+hosts_file
+ os.system(ansible_playbook_command)
+ print ""
+
+def install_docker(d_name):
+ print ""
+ print "Installing docker on this VM: ",d_name
+ print ""
+ ansible_playbook_command="ansible-playbook --private-key "+private_key+" -u root -s "+docker_playbook+" -i "+hosts_file
+ os.system(ansible_playbook_command)
+ print ""
 
 def write_ansible_hosts_file():
  manager = digitalocean.Manager(token=my_token)
@@ -80,7 +108,6 @@ def write_ansible_hosts_file():
    droplet_data=droplet.load()
    hosts.append(droplet_data.ip_address)
  print ""
-
  ansible_hosts_file=open(hosts_file,"w")
  for host in hosts:
   print "-> ",host
@@ -109,6 +136,8 @@ def restart_web_services(d_name):
 def update_wp_code(d_name):
  #checkout latest WP site from GIT/Hub and ansible update the web servers
  print ""
+ print "Updating wordpress site from GitHub"
+ print ""
 
 def list_do_ssh_keys():
  manager = digitalocean.Manager(token=my_token)
@@ -123,7 +152,7 @@ def  deploy_wp_playbook(d_name):
  print ""
  print "Running WordPress Server Playbook ..."
  print ""
- ansible_playbook_command="ansible-playbook --private-key "+private_key+" -u root -s "+wordpress_playbook+" -i "+"/Users/traianow/Projects/DO/hosts.orig"
+ ansible_playbook_command="ansible-playbook --private-key "+private_key+" -u root -s "+wordpress_playbook+" -i "+hosts_file
  os.system(ansible_playbook_command)
  print ""
  print "DONE! Your Wordpress Blog is Ready, go to: http://<ip-address-of-server>"
@@ -163,6 +192,8 @@ def build_new_droplet(d_name):
  backups=True)
  results=droplet.create()
  print "droplet creation data> ",results
+ print "Refreshing ansible hosts list."
+ write_ansible_hosts_file()
 
 def check_droplet_status(droplet):
  actions = droplet.get_actions()
