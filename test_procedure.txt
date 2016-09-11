@@ -1,0 +1,408 @@
+Wordpress Setup Test Procedure:
+===============================
+
+0. Overview Test scenario:
+
+ - A single python automation script (script do_rollout.py) is configured to use the Digital Ocean API to build a VM and create a wordpress web site using sources from GitHub
+ - Test directory hosts the automation script, ansible playbook, private key for digital ocean  account and hosts list for ansible
+ - Automation script is written in python and builds the VM
+ - Ansible playbook takes care of server configuration (install mysql, nginx, wordpress, configure and restore DB)
+ - Wordpress site configuration is stored in GitHub: https://github.com/archbungle/nginx
+
+NOTE: You need a Digital Ocean account, with API token and generate your own SSH key to test this script, you'll need to add these details to variables at the top of the script. 
+
+1. Steps to test the solution:
+==============================
+
+- The procedure to demonstrate the automation has two parts:
+
+ A) Testing automation of Wordpress build in docker 
+ B) Testing automation of Wordpress build in standard VM
+
+steps For Part A)
+
+steps For Part B):
+
+ 1) Deploy a VM via the D.O api.
+ 2) Power up the VM
+ 3) Get the details of the VM (ip address)
+ 4) Add the VM IP address to the list of hosts to work on
+ 5) Run the ansible playbook to build NGINX+Wordpress and deploy the site content from Github
+ 6) Connect via a browser to the word press site to validate it's there.
+ 7) Optional: Restart services, shutdown the host, power it up, with the site being available once again on powerup.
+ 8) Delete the server and repeat from start again. 
+
+---
+
+Part A):
+
+1) Build a fresh VM in D.O
+
+---
+option> 5
+Enter droplet name: dockertest03
+
+Building a new droplet ...
+
+droplet creation data>  None
+Refreshing ansible hosts list.
+
+Generating ansible hosts list.
+
+->  192.241.185.98
+Done with ansible hosts list.
+
+1] Enter 1 for a list of droplets.
+2] Enter 2 to poweroff all droplets.
+3] Enter 3 startup all droplets.
+4] Enter 4 delete all droplets.
+5] Enter 5 to create a droplet
+6] Enter 6 to get droplet details
+7] Enter 7 to Ansible ping servers
+8] Enter 8 to run wordpress playbook
+9] Enter 9 to list D.O SSH keys
+10] Enter 10 to update WordPress site
+11] Enter 11 to restart Web Services
+12] Enter 12 to generate Ansible hosts file.
+13] Enter 13 to run the docker playbook.
+14] Enter 14 to run 'dockerized' WordPress playbook.
+15] Enter 15 to quit.
+option> 
+---
+
+2) Deploy docker on the newly created VM:
+
+---
+option> 13
+Enter droplet name to install docker on: 
+
+Installing docker on this VM:  
+
+[DEPRECATION WARNING]: Instead of sudo/sudo_user, use become/become_user and make sure become_method is 'sudo' (default).
+This feature 
+will be removed in a future release. Deprecation warnings can be disabled by setting deprecation_warnings=False in ansible.cfg.
+
+PLAY [Prepare docker on a new vm] **********************************************
+
+TASK [setup] *******************************************************************
+ok: [192.241.168.187]
+
+TASK [add docker apt key] ******************************************************
+changed: [192.241.168.187]
+
+TASK [add docker apt repository] ***********************************************
+
+TASK [setup] *******************************************************************
+ok: [192.241.168.187]
+
+TASK [add docker apt key] ******************************************************
+changed: [192.241.168.187]
+
+TASK [add docker apt repository] ***********************************************
+changed: [192.241.168.187]
+
+TASK [uninstall old docker] ****************************************************
+ok: [192.241.168.187]
+
+TASK [install docker] **********************************************************
+changed: [192.241.168.187]
+
+TASK [add ubuntu to docker group] **********************************************
+changed: [192.241.168.187]
+
+TASK [get docker compose] ******************************************************
+changed: [192.241.168.187]
+
+PLAY RECAP *********************************************************************
+192.241.168.187            : ok=7    changed=5    unreachable=0    failed=0   
+
+---
+
+
+3) Deploy MySQL and Wordpress docker containers, link them, and deploy last website database to the site:
+
+Part B):
+
+---
+option> 14
+Enter droplet name:
+
+Installing docker on this VM:
+
+
+PLAY [all] *********************************************************************
+
+TASK [setup] *******************************************************************
+ok: [192.241.168.187]
+
+TASK [Installs python pip] *****************************************************
+ok: [192.241.168.187]
+
+TASK [Installs python development headers and libraries] ***********************
+ok: [192.241.168.187]
+
+TASK [Installs required mysql libraries for python] ****************************
+ok: [192.241.168.187]
+
+TASK [Install the Python MySQLB module] ****************************************
+ok: [192.241.168.187]
+
+TASK [pull the official mysql image from the docker main site] *****************
+changed: [192.241.168.187]
+
+TASK [pull the official wordpress image from the docker main site] *************
+
+---
+
+NOTE: At this point you should be able to browse to http://192.241.168.187 and see a fresh WP installation.
+
+
+2. Run the automation test script (will provide a menu of options to build the wordpress site)
+==============================================================================================
+
+ 1) Deploy a VM via the D.O api.
+
+bash-3.2$ python dorollout.py 
+
+option> 1
+1] Enter 1 for a list of droplets.
+2] Enter 2 to poweroff all droplets.
+3] Enter 3 startup all droplets.
+4] Enter 4 delete all droplets.
+5] Enter 5 to create a droplet
+6] Enter 6 to get droplet details
+7] Enter 7 to Ansible ping servers
+8] Enter 8 to run wordpress playbook
+9] Enter 9 to list D.O SSH keys
+10] Enter 10 to update WordPress site
+11] Enter 11 to restart Web Services
+12] Enter 12 to generate Ansible hosts file.
+15] Enter 15 to quit.
+option> 
+
+- Build the droplet:
+
+option> 5
+Enter droplet name: wptest04
+
+Building a new droplet ...
+
+droplet creation data>  None
+1] Enter 1 for a list of droplets.
+2] Enter 2 to poweroff all droplets.
+3] Enter 3 startup all droplets.
+4] Enter 4 delete all droplets.
+5] Enter 5 to create a droplet
+6] Enter 6 to get droplet details
+7] Enter 7 to Ansible ping servers
+8] Enter 8 to run wordpress playbook
+9] Enter 9 to list D.O SSH keys
+10] Enter 10 to update WordPress site
+11] Enter 11 to restart Web Services
+12] Enter 12 to generate Ansible hosts file.
+15] Enter 15 to quit.
+option> 
+
+- Generate the ansible hosts file (Select option "12"):
+
+option> 12
+
+Generating ansible hosts list.
+
+->  192.241.166.119
+Done with ansible hosts list.
+
+1] Enter 1 for a list of droplets.
+2] Enter 2 to poweroff all droplets.
+3] Enter 3 startup all droplets.
+4] Enter 4 delete all droplets.
+5] Enter 5 to create a droplet
+6] Enter 6 to get droplet details
+7] Enter 7 to Ansible ping servers
+8] Enter 8 to run wordpress playbook
+9] Enter 9 to list D.O SSH keys
+10] Enter 10 to update WordPress site
+11] Enter 11 to restart Web Services
+12] Enter 12 to generate Ansible hosts file.
+15] Enter 15 to quit.
+option> 
+ 
+ 2) Power up the VM (select option "3")
+
+option> 3
+droplet:  25357770 wptest04 action:  142972569 power_on [completed]  Action Status:  completed
+droplet:  25357770 wptest04 action:  142971804 create [completed]  Action Status:  completed
+1] Enter 1 for a list of droplets.
+2] Enter 2 to poweroff all droplets.
+3] Enter 3 startup all droplets.
+4] Enter 4 delete all droplets.
+5] Enter 5 to create a droplet
+6] Enter 6 to get droplet details
+7] Enter 7 to Ansible ping servers
+8] Enter 8 to run wordpress playbook
+9] Enter 9 to list D.O SSH keys
+10] Enter 10 to update WordPress site
+11] Enter 11 to restart Web Services
+12] Enter 12 to generate Ansible hosts file.
+15] Enter 15 to quit.
+option> 
+
+ 3) Get the details of the VM (ip address)
+
+option> 1
+droplet:  25357770 wptest04
+1] Enter 1 for a list of droplets.
+2] Enter 2 to poweroff all droplets.
+3] Enter 3 startup all droplets.
+4] Enter 4 delete all droplets.
+5] Enter 5 to create a droplet
+6] Enter 6 to get droplet details
+7] Enter 7 to Ansible ping servers
+8] Enter 8 to run wordpress playbook
+9] Enter 9 to list D.O SSH keys
+10] Enter 10 to update WordPress site
+11] Enter 11 to restart Web Services
+12] Enter 12 to generate Ansible hosts file.
+15] Enter 15 to quit.
+option>
+
+
+ 4) Add the VM IP address to the list of hosts to work on
+
+Test if the host is pingable by Ansible:
+
+option> 7
+
+Ansible pinging hosts in inventory (Select option "7"): 
+
+Pinging with:  ansible -u root -i /Users/traianow/Projects/DO/hosts.orig --private-key=/Users/traianow/Projects/DO/do_rsa all -m ping
+The authenticity of host '192.241.166.119 (192.241.166.119)' can't be established.
+ECDSA key fingerprint is SHA256:umm9K/62H5XDQd9jpq0fNGIf5N3V73FoiYgXkgGvWoI.
+Are you sure you want to continue connecting (yes/no)? yes
+192.241.166.119 | SUCCESS => {
+    "changed": false, 
+    "ping": "pong"
+}
+
+
+ 5) Run the ansible playbook to build NGINX+Wordpress and deploy the site content from Github (Option "8")
+
+(Here is a printout of all the playbook actions during a live run):
+
+----
+option> 8
+Enter droplet name: wptest04
+Running WordPress Server Playbook ...
+PLAY [all] *********************************************************************
+TASK [setup] *******************************************************************
+TASK [Installs git] ************************************************************
+changed: [192.241.166.119]
+TASK [Installs python pip] *****************************************************
+changed: [192.241.166.119]
+TASK [Installs python development headers and libraries] ***********************
+changed: [192.241.166.119]
+TASK [Installs required mysql libraries for python] ****************************
+changed: [192.241.166.119]
+TASK [Install the Python MySQLB module] ****************************************
+changed: [192.241.166.119]
+TASK [Installs nginx web server] ***********************************************
+changed: [192.241.166.119]
+TASK [Installs mysql server] ***************************************************
+TASK [Check Nginx configs exist] ***********************************************
+ok: [192.241.166.119]
+TASK [Remove default Nginx configs] ********************************************
+changed: [192.241.166.119]
+TASK [Clone Nginx configs] *****************************************************
+changed: [192.241.166.119]
+TASK [mysql_user] **************************************************************
+changed: [192.241.166.119]
+TASK [Symlink default site] ****************************************************
+ok: [192.241.166.119]
+TASK [Move wp confgurtion into place to /var/www/html/] ************************
+changed: [192.241.166.119]
+TASK [mysql_db] ****************************************************************
+changed: [192.241.166.119]
+PLAY RECAP *********************************************************************
+192.241.166.119            : ok=20   changed=7    unreachable=0    failed=0   
+---
+
+
+ 6) Connect via a browser to the word press site to validate it's there.
+
+ - Go to the IP listed in the playbook run: http://192.241.166.119
+
+ (NOTE: You should see the wordpress site which is obtained from the Github repo)
+
+ 7) Optional: Restart services, shutdown the host, power it up, with the site being available once again on powerup.
+
+You can do minor maintenance activities like restart nginx, halt and boot the DigitialOcean VM:
+
+- Power off:
+
+option> 1
+droplet:  25357770 wptest04
+1] Enter 1 for a list of droplets.
+2] Enter 2 to poweroff all droplets.
+3] Enter 3 startup all droplets.
+4] Enter 4 delete all droplets.
+5] Enter 5 to create a droplet
+6] Enter 6 to get droplet details
+7] Enter 7 to Ansible ping servers
+8] Enter 8 to run wordpress playbook
+9] Enter 9 to list D.O SSH keys
+10] Enter 10 to update WordPress site
+11] Enter 11 to restart Web Services
+12] Enter 12 to generate Ansible hosts file.
+15] Enter 15 to quit.
+option> 2
+Bell in window 0  
+
+
+ 8) Delete the server and repeat from start again. 
+
+ - You can delete the wordpress server completely from Digital Ocean  repeat the process again to demonstrate the 
+   stability/repeatability of the script.
+
+ - Delete all droplets in the demo:
+
+option> 4
+droplet:  25357770 wptest04 action:  142994069 destroy [completed]  Action Status:  completed
+droplet:  25357770 wptest04 action:  142993901 shutdown [completed]  Action Status:  completed
+droplet:  25357770 wptest04 action:  142972569 power_on [completed]  Action Status:  completed
+droplet:  25357770 wptest04 action:  142971804 create [completed]  Action Status:  completed
+1] Enter 1 for a list of droplets.
+2] Enter 2 to poweroff all droplets.
+3] Enter 3 startup all droplets.
+4] Enter 4 delete all droplets.
+5] Enter 5 to create a droplet
+6] Enter 6 to get droplet details
+7] Enter 7 to Ansible ping servers
+8] Enter 8 to run wordpress playbook
+9] Enter 9 to list D.O SSH keys
+10] Enter 10 to update WordPress site
+11] Enter 11 to restart Web Services
+12] Enter 12 to generate Ansible hosts file.
+15] Enter 15 to quit.
+option> 
+
+Check the droplets are gone:
+
+---
+option> 1
+1] Enter 1 for a list of droplets.
+2] Enter 2 to poweroff all droplets.
+3] Enter 3 startup all droplets.
+4] Enter 4 delete all droplets.
+5] Enter 5 to create a droplet
+6] Enter 6 to get droplet details
+7] Enter 7 to Ansible ping servers
+8] Enter 8 to run wordpress playbook
+9] Enter 9 to list D.O SSH keys
+10] Enter 10 to update WordPress site
+11] Enter 11 to restart Web Services
+12] Enter 12 to generate Ansible hosts file.
+15] Enter 15 to quit.
+option> 
+---
+
+
